@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grant Alert Automation System - Impact Applications</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #1e293b;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #0f172a 0%, #1e293b 25%, #334155 50%, #475569 75%, #64748b 100%);
+            color: white;
+            padding: 3rem 0;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 100" fill="%23ffffff" opacity="0.1"><polygon points="0,0 1000,100 1000,0"/></svg>');
+            background-size: cover;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 0.75rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #ffffff 0%, #e2e8f0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            font-size: 1.3rem;
+            opacity: 0.9;
+            margin-bottom: 1rem;
+        }
+
+        .header-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+
+        .info-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0.05) 100%);
+            padding: 1.5rem;
+            border-radius: 12px;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255,255,255,0.2);
+            transition: all 0.3s ease;
+        }
+
+        .info-card:hover {
+            transform: translateY(-5px);
+            background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, rgba(255,255,255,0.1) 100%);
+        }
+
+        .info-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            margin-bottom: 0.25rem;
+        }
+
+        .info-value {
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        .nav-container {
+            background: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav-tabs {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            overflow-x: auto;
+        }
+
+        .nav-tab {
+            padding: 1rem 2rem;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+            font-weight: 500;
+        }
+
+        .nav-tab:hover {
+            background: #f1f5f9;
+            color: #1e40af;
+        }
+
+        .nav-tab.active {
+            border-bottom-color: #3b82f6;
+            color: #1e40af;
+            background: #f1f5f9;
+        }
+
+        .content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border-radius: 16px;
+            padding: 2.5rem;
+            margin-bottom: 2.5rem;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.08);
+            transition: all 0.4s ease;
+            border: 1px solid rgba(148, 163, 184, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 50%, #7c3aed 100%);
+        }
+
+        .card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+        }
+
+        .card-title {
+            font-size: 1.75rem;
+            color: #0f172a;
+            margin-bottom: 1.25rem;
+            display: flex;
+            align-items: center;
+            font-weight: 700;
+        }
+
+        .card-icon {
+            width: 36px;
+            height: 36px;
+            margin-right: 1rem;
+            color: #3b82f6;
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            padding: 8px;
+            border-radius: 10px;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .metric-box {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 50%, #7c3aed 100%);
+            color: white;
+            padding: 2rem;
+            border-radius: 16px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .metric-box::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: rotate(45deg);
+            transition: all 0.6s ease;
+        }
+
+        .metric-box:hover::before {
+            animation: shimmer 1.5s ease-in-out;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+
+        .metric-box:hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 15px 40px rgba(99, 102, 241, 0.4);
+        }
+
+        .metric-number {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .deliverable-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .deliverable-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border: 2px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 2rem;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .deliverable-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(59, 130, 246, 0.05), transparent);
+            transition: all 0.6s ease;
+        }
+
+        .deliverable-card:hover {
+            border-color: #3b82f6;
+            transform: translateY(-8px);
+            box-shadow: 0 15px 40px rgba(59, 130, 246, 0.15);
+        }
+
+        .deliverable-card:hover::before {
+            left: 100%;
+        }
+
+        .deliverable-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .deliverable-icon {
+            width: 28px;
+            height: 28px;
+            margin-right: 0.75rem;
+            color: #3b82f6;
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            padding: 6px;
+            border-radius: 8px;
+        }
+
+        .feature-list {
+            list-style: none;
+            margin: 1rem 0;
+        }
+
+        .feature-list li {
+            padding: 0.5rem 0;
+            position: relative;
+            padding-left: 1.5rem;
+        }
+
+        .feature-list li:before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: #10b981;
+            font-weight: bold;
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            top: 0.5rem;
+        }
+
+        .timeline-container {
+            position: relative;
+        }
+
+        .timeline-item {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border-left: 4px solid transparent;
+            border-image: linear-gradient(135deg, #3b82f6 0%, #7c3aed 100%) 1;
+            margin-bottom: 2rem;
+            padding: 2rem;
+            border-radius: 0 16px 16px 0;
+            position: relative;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+        }
+
+        .timeline-item:hover {
+            transform: translateX(10px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.15);
+        }
+
+        .timeline-item:before {
+            content: '';
+            position: absolute;
+            left: -10px;
+            top: 2rem;
+            width: 16px;
+            height: 16px;
+            background: linear-gradient(135deg, #3b82f6 0%, #7c3aed 100%);
+            border-radius: 50%;
+            box-shadow: 0 0 0 4px #ffffff, 0 0 0 8px rgba(59, 130, 246, 0.2);
+        }
+
+        .timeline-week {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 0.75rem;
+            background: linear-gradient(135deg, #3b82f6 0%, #7c3aed 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .pricing-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border: 3px solid transparent;
+            background-clip: padding-box;
+            border-radius: 20px;
+            padding: 3rem 2.5rem;
+            text-align: center;
+            max-width: 600px;
+            margin: 2rem auto;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pricing-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            border-radius: 20px;
+            padding: 3px;
+            background: linear-gradient(135deg, #3b82f6 0%, #7c3aed 50%, #ec4899 100%);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask-composite: exclude;
+            z-index: -1;
+        }
+
+        .pricing-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 30px 80px rgba(59, 130, 246, 0.2);
+        }
+
+        .pricing-title {
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 1.5rem;
+            color: #0f172a;
+        }
+
+        .pricing-amount {
+            font-size: 4.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #3b82f6 0%, #7c3aed 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 0.75rem;
+        }
+
+        .pricing-period {
+            color: #64748b;
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+        }
+
+        .cta-button {
+            background: linear-gradient(135deg, #3b82f6 0%, #7c3aed 50%, #ec4899 100%);
+            color: white;
+            padding: 1.25rem 2.5rem;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: all 0.6s ease;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(59, 130, 246, 0.4);
+        }
+
+        .cta-button:hover::before {
+            left: 100%;
+        }
+
+        .requirements-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .requirement-item {
+            background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%);
+            padding: 2rem;
+            border-radius: 16px;
+            border-left: 4px solid transparent;
+            border-image: linear-gradient(135deg, #3b82f6 0%, #7c3aed 100%) 1;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .requirement-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .requirement-title {
+            font-weight: 700;
+            color: #0f172a;
+            margin-bottom: 0.75rem;
+            font-size: 1.2rem;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2.5rem;
+            }
+            
+            .header-info {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+            
+            .nav-tabs {
+                flex-wrap: wrap;
+            }
+            
+            .nav-tab {
+                flex: 1;
+                text-align: center;
+                padding: 1rem;
+                font-size: 0.9rem;
+            }
+            
+            .content {
+                padding: 1rem;
+            }
+            
+            .card {
+                padding: 2rem;
+            }
+
+            .pricing-amount {
+                font-size: 3.5rem;
+            }
+
+            .metrics-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1rem;
+            }
+
+            .deliverable-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .requirements-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <h1>Grant Alert Automation System</h1>
+            <p>Intelligent Grant Discovery & Client Matching Platform</p>
+            
+            <div class="header-info">
+                <div class="info-card">
+                    <div class="info-label">Client</div>
+                    <div class="info-value">Impact Applications</div>
+                </div>
+                <div class="info-card">
+                    <div class="info-label">Provider</div>
+                    <div class="info-value">Ahmed Baysuyev</div>
+                </div>
+                <div class="info-card">
+                    <div class="info-label">Timeline</div>
+                    <div class="info-value">2-3 Weeks</div>
+                </div>
+                <div class="info-card">
+                    <div class="info-label">Investment</div>
+                    <div class="info-value">$2,500</div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <nav class="nav-container">
+        <div class="nav-tabs">
+            <div class="nav-tab active" onclick="showTab('overview')">Overview</div>
+            <div class="nav-tab" onclick="showTab('deliverables')">What You Get</div>
+            <div class="nav-tab" onclick="showTab('timeline')">Timeline</div>
+            <div class="nav-tab" onclick="showTab('investment')">Investment</div>
+            <div class="nav-tab" onclick="showTab('requirements')">Requirements</div>
+        </div>
+    </nav>
+
+    <main class="content">
+        <!-- Overview Tab -->
+        <div id="overview" class="tab-content active">
+            <div class="card">
+                <h2 class="card-title">
+                    <svg class="card-icon" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    The Problem We're Solving
+                </h2>
+                <p>Impact Applications currently spends 2-3 hours weekly manually researching grants, checking eligibility, and sending alerts to clients. This manual process leads to missed opportunities, delayed notifications, and valuable time that could be spent on high-value activities like client acquisition and grant writing.</p>
+                
+                <div class="metrics-grid">
+                    <div class="metric-box">
+                        <div class="metric-number">20+</div>
+                        <div class="metric-label">Hours Saved Monthly</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-number">24/7</div>
+                        <div class="metric-label">Automated Monitoring</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-number">0</div>
+                        <div class="metric-label">Missed Opportunities</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-number">100%</div>
+                        <div class="metric-label">Accuracy & Consistency</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title">
+                    <svg class="card-icon" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z"/>
+                    </svg>
+                    Our Solution
+                </h2>
+                <p>A fully automated Grant Alert System that continuously monitors Canadian grant databases, intelligently matches opportunities to your client profiles, and delivers personalized grant alerts directly to qualified prospects - all while you focus on growing your business.</p>
+                
+                <ul class="feature-list">
+                    <li><strong>Automated Grant Discovery:</strong> 24/7 monitoring of Canadian grant databases and government newsletters</li>
+                    <li><strong>Smart Client Matching:</strong> AI-powered eligibility assessment based on your client database</li>
+                    <li><strong>Personalized Alerts:</strong> Customized email notifications sent directly to qualified clients</li>
+                    <li><strong>CRM Integration:</strong> Seamless connection with your Monday CRM and Google Sheets</li>
+                    <li><strong>Zero Maintenance:</strong> Set-it-and-forget-it automation that works around the clock</li>
+                </ul>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title">
+                    <svg class="card-icon" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                    Expected Results
+                </h2>
+                <ul class="feature-list">
+                    <li>Reclaim 20+ hours monthly for high-value activities</li>
+                    <li>Never miss another grant opportunity</li>
+                    <li>Provide exceptional value to clients through proactive alerts</li>
+                    <li>Scale your client base without increasing research overhead</li>
+                    <li>Position Impact Applications as the most tech-forward grant consultancy</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Deliverables Tab -->
+        <div id="deliverables" class="tab-content">
+            <div class="deliverable-grid">
+                <div class="deliverable-card">
+                    <h3 class="deliverable-title">
+                        <svg class="deliverable-icon" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        Grant Discovery Engine
+                    </h3>
+                    <ul class="feature-list">
+                        <li>Automated monitoring of Canadian grant databases</li>
+                        <li>Integration with government newsletters and RSS feeds</li>
+                        <li>Real-time opportunity detection</li>
+                        <li>Duplicate detection and filtering</li>
+                        <li>Comprehensive grant data extraction</li>
+                    </ul>
+                </div>
+
+                <div class="deliverable-card">
+                    <h3 class="deliverable-title">
+                        <svg class="deliverable-icon" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9 4.804A7.968 7.968 0 005.5 4C4.015 4 2.6 4.339 1.318 4.946a.75.75 0 00-.437.695v8.718c0 .566.598.9 1.04.658C2.898 14.513 4.162 14 5.5 14c1.338 0 2.602.513 3.579 1.017.42.216.921-.142.921-.658V4.804z"/>
+                        </svg>
+                        Smart Eligibility Matching
+                    </h3>
+                    <ul class="feature-list">
+                        <li>AI-powered client profile analysis</li>
+                        <li>Industry, size, and location matching</li>
+                        <li>Custom eligibility criteria setup</li>
+                        <li>Confidence scoring system</li>
+                        <li>False positive prevention</li>
+                    </ul>
+                </div>
+
+                <div class="deliverable-card">
+                    <h3 class="deliverable-title">
+                        <svg class="deliverable-icon" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M3 4a1 1 0 011-1h12a1 1 0 011 1v2a1 1 0 01-1 1H4a1 1 0 01-1-1V4zM3 10a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H4a1 1 0 01-1-1v-6zM14 9a1 1 0 00-1 1v6a1 1 0 001 1h2a1 1 0 001-1v-6a1 1 0 00-1-1h-2z"/>
+                        </svg>
+                        CRM Integration
+                    </h3>
+                    <ul class="feature-list">
+                        <li>Monday CRM synchronization</li>
+                        <li>Google Sheets backup system</li>
+                        <li>Automated data updates</li>
+                        <li>Client profile management</li>
+                        <li>Secure data handling</li>
+                    </ul>
+                </div>
+
+                <div class="deliverable-card">
+                    <h3 class="deliverable-title">
+                        <svg class="deliverable-icon" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z"/>
+                            <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z"/>
+                        </svg>
+                        Automated Email System
+                    </h3>
+                    <ul class="feature-list">
+                        <li>Personalized email templates</li>
+                        <li>Scheduled weekly/daily delivery</li>
+                        <li>Grant opportunity summaries</li>
+                        <li>Direct application links</li>
+                        <li>Professional branding</li>
+                    </ul>
+                </div>
+
+                <div class="deliverable-card">
+                    <h3 class="deliverable-title">
+                        <svg class="deliverable-icon" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.84L7.25 9.035l1.394.597a1 1 0 00.788 0l7-3a1 1 0 000-1.84l-7-3z"/>
+                        </svg>
+                        Training & Support
+                    </h3>
+                    <ul class="feature-list">
+                        <li>Complete system documentation</li>
+                        <li>Video training materials</li>
+                        <li>30-day post-launch support</li>
+                        <li>System optimization</li>
+                        <li>Troubleshooting guide</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Timeline Tab -->
+        <div id="timeline" class="tab-content">
+            <div class="timeline-container">
+                <div class="timeline-item">
+                    <div class="timeline-week">Week 1: Discovery & Development</div>
+                    <ul class="feature-list">
+                        <li>Detailed workflow analysis session</li>
+                        <li>Client database review and mapping</li>
+                        <li>Grant source identification and setup</li>
+                        <li>Core system development begins</li>
+                        <li>Monday CRM integration setup</li>
+                    </ul>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-week">Week 2: Build & Integration</div>
+                    <ul class="feature-list">
+                        <li>Grant discovery engine completion</li>
+                        <li>Eligibility matching system build</li>
+                        <li>Email automation development</li>
+                        <li>Full system integration testing</li>
+                        <li>Email template customization</li>
+                    </ul>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-week">Week 3: Testing & Launch</div>
+                    <ul class="feature-list">
+                        <li>Beta testing with real client data</li>
+                        <li>Performance optimization</li>
+                        <li>Team training and documentation</li>
+                        <li>Live system deployment</li>
+                        <li>Go-live support and monitoring</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Investment Tab -->
+        <div id="investment" class="tab-content">
+            <div class="pricing-card">
+                <div class="pricing-title">Complete Automation System</div>
+                <div class="pricing-amount">$2,500</div>
+                <div class="pricing-period">One-time investment</div>
+                <ul class="feature-list">
+                    <li>Grant discovery & monitoring engine</li>
+                    <li>AI-powered eligibility matching</li>
+                    <li>Monday CRM integration</li>
+                    <li>Automated email alert system</li>
+                    <li>Google Sheets backup</li>
+                    <li>Complete training & documentation</li>
+                    <li>30-day post-launch support</li>
+                </ul>
+                <a href="mailto:ahmedbaysuyev14@gmail.com?subject=Grant Automation Project - Let's Get Started" class="cta-button">Get Started Today</a>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title">
+                    <svg class="card-icon" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-13a1 1 0 10-2 0v.092a4.535 4.535 0 00-1.676.662C6.602 6.234 6 7.009 6 8c0 .99.602 1.765 1.324 2.246.48.32 1.054.545 1.676.662v1.941c-.391-.127-.68-.317-.843-.504a1 1 0 10-1.51 1.31c.562.649 1.413 1.076 2.353 1.253V15a1 1 0 102 0v-.092a4.535 4.535 0 001.676-.662C13.398 13.766 14 12.991 14 12c0-.99-.602-1.765-1.324-2.246A4.535 4.535 0 0011 9.092V7.151c.391.127.68.317.843.504a1 1 0 101.511-1.31c-.563-.649-1.413-1.076-2.354-1.253V5z" clip-rule="evenodd"/>
+                    </svg>
+                    Return on Investment
+                </h2>
+                <p>Your current manual process takes 2-3 hours weekly (104-156 hours annually). At conservative consultant rates of $100/hour, this represents $10,400-$15,600 in opportunity cost per year. This automation pays for itself in just 2-3 months while providing ongoing value.</p>
+                
+                <div class="metrics-grid">
+                    <div class="metric-box">
+                        <div class="metric-number">2-3</div>
+                        <div class="metric-label">Month Payback Period</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-number">$15,600</div>
+                        <div class="metric-label">Annual Time Savings</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-number">624%</div>
+                        <div class="metric-label">ROI in Year 1</div>
+                    </div>
+                    <div class="metric-box">
+                        <div class="metric-number">∞</div>
+                        <div class="metric-label">Missed Opportunities Prevented</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Requirements Tab -->
+        <div id="requirements" class="tab-content">
+            <div class="card">
+                <h2 class="card-title">
+                    <svg class="card-icon" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd"/>
+                    </svg>
+                    What We Need From You
+                </h2>
+                <p>To ensure successful implementation, we'll need your collaboration on gathering the following information and access:</p>
+            </div>
+
+            <div class="requirements-grid">
+                <div class="requirement-item">
+                    <div class="requirement-title">Client Database</div>
+                    <ul class="feature-list">
+                        <li>Monday CRM access or export</li>
+                        <li>Current client contact information</li>
+                        <li>Company details (industry, size, location)</li>
+                        <li>Existing client segments/categories</li>
+                    </ul>
+                </div>
+
+                <div class="requirement-item">
+                    <div class="requirement-title">Current Process</div>
+                    <ul class="feature-list">
+                        <li>Existing grant research workflow</li>
+                        <li>Eligibility criteria templates</li>
+                        <li>Email communication samples</li>
+                        <li>Grant databases you currently use</li>
+                    </ul>
+                </div>
+
+                <div class="requirement-item">
+                    <div class="requirement-title">Technical Access</div>
+                    <ul class="feature-list">
+                        <li>Email service for sending alerts</li>
+                        <li>Google Workspace for Sheets integration</li>
+                        <li>Monday CRM API access</li>
+                        <li>Domain verification for email delivery</li>
+                    </ul>
+                </div>
+
+                <div class="requirement-item">
+                    <div class="requirement-title">Preferences</div>
+                    <ul class="feature-list">
+                        <li>Alert frequency (daily/weekly)</li>
+                        <li>Email template preferences</li>
+                        <li>Priority grant types/programs</li>
+                        <li>Branding guidelines</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title">
+                    <svg class="card-icon" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                    </svg>
+                    Next Steps
+                </h2>
+                <ul class="feature-list">
+                    <li><strong>Initial Call:</strong> Schedule detailed workflow review session</li>
+                    <li><strong>Agreement:</strong> Finalize project scope and timeline</li>
+                    <li><strong>Kickoff:</strong> Begin development with requirements gathering</li>
+                    <li><strong>Testing:</strong> Beta test system with your team</li>
+                    <li><strong>Launch:</strong> Go live with full automation system</li>
+                </ul>
+                
+                <div style="text-align: center; margin-top: 2rem;">
+                    <a href="mailto:ahmedbaysuyev14@gmail.com?subject=Grant Automation Project - Ready to Start" class="cta-button">Let's Transform Your Grant Process</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        function showTab(tabName) {
+            // Hide all tab contents
+            const tabContents = document.querySelectorAll('.tab-content');
+            tabContents.forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Remove active class from all tabs
+            const tabs = document.querySelectorAll('.nav-tab');
+            tabs.forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            document.getElementById(tabName).classList.add('active');
+            
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+        }
+    </script>
+</body>
+</html>
